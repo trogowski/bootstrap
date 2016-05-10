@@ -186,9 +186,17 @@ angular.module('ui.bootstrap.dropdown', ['ui.bootstrap.position'])
     }
   };
 
+  function overflowsViewport() {
+    var clientRect = $element[0].getBoundingClientRect(),
+      dropdownHeight = scope.getDropdownElement().outerHeight();
+
+    return !!(clientRect.top > dropdownHeight &&
+    window.innerHeight - clientRect.top < clientRect.height + dropdownHeight);
+  }
+
   scope.$watch('isOpen', function(isOpen, wasOpen) {
     if (appendTo && self.dropdownMenu) {
-      var pos = $position.positionElements($element, self.dropdownMenu, 'bottom-left', true),
+      var pos = $position.positionElements($element, self.dropdownMenu, 'auto bottom-left', true),
         css,
         rightalign;
 
@@ -196,6 +204,10 @@ angular.module('ui.bootstrap.dropdown', ['ui.bootstrap.position'])
         top: pos.top + 'px',
         display: isOpen ? 'block' : 'none'
       };
+
+      if (overflowsViewport()) {
+        css.top = pos.top - scope.getDropdownElement().outerHeight() - $element.height() + 'px';
+      }
 
       rightalign = self.dropdownMenu.hasClass('dropdown-menu-right');
       if (!rightalign) {
