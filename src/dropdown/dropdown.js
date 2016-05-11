@@ -186,9 +186,17 @@ angular.module('ui.bootstrap.dropdown', ['ui.bootstrap.position'])
     }
   };
 
-  function overflowsViewport() {
-    var clientRect = $element[0].getBoundingClientRect(),
-      dropdownHeight = scope.getDropdownElement().outerHeight();
+  function getDropdownHeight() {
+    var dropdown = scope.getDropdownElement();
+    dropdown.css({visibility: 'hidden', display: 'block'});
+    var height = dropdown[0].offsetHeight;
+    dropdown.css({visibility: 'visible', display: 'none'});
+
+    return height;
+  }
+
+  function overflowsViewport(dropdownHeight) {
+    var clientRect = $element[0].getBoundingClientRect();
 
     return !!(clientRect.top > dropdownHeight &&
     window.innerHeight - clientRect.top < clientRect.height + dropdownHeight);
@@ -198,15 +206,16 @@ angular.module('ui.bootstrap.dropdown', ['ui.bootstrap.position'])
     if (appendTo && self.dropdownMenu) {
       var pos = $position.positionElements($element, self.dropdownMenu, 'auto bottom-left', true),
         css,
-        rightalign;
+        rightalign,
+        dropdownHeight = getDropdownHeight();
 
       css = {
         top: pos.top + 'px',
         display: isOpen ? 'block' : 'none'
       };
 
-      if (overflowsViewport()) {
-        css.top = pos.top - scope.getDropdownElement().outerHeight() - $element.height() + 'px';
+      if (overflowsViewport(dropdownHeight)) {
+        css.top = pos.top - dropdownHeight - $element[0].offsetHeight + 'px';
       }
 
       rightalign = self.dropdownMenu.hasClass('dropdown-menu-right');
